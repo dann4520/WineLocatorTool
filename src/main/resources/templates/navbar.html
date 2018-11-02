@@ -1,0 +1,53 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Wine Search - Admin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" th:fragment="navbar">
+    <a class="navbar-brand" href="/">Wine</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item" id="dashboard">
+                <a class="nav-link" href="/admin">Dashboard</span></a>
+            </li>
+            <li class="nav-item" id="product">
+                <a class="nav-link" href="/admin/product">Products</a>
+            </li>
+            <li class="nav-item" id="spreadsheet">
+                <a class="nav-link" href="/admin/spreadsheet">Spreadsheets</a>
+            </li>
+            <li class="nav-item" id="data">
+                <a class="nav-link" href="/admin/data">Data</a>
+            </li>
+        </ul>
+    </div>
+    <script>
+    var url = window.location.href
+    switch(url.substr(url.lastIndexOf('/') + 1)){
+        case "admin":
+            document.getElementById("dashboard").classList.add("active")
+            break;
+        case "product":
+            document.getElementById("product").classList.add("active")
+            break;
+        case "spreadsheet":
+            document.getElementById("spreadsheet").classList.add("active")
+            break;
+        case "data":
+            document.getElementById("data").classList.add("active")
+            break;
+    }
+    </script>
+</nav>
+
+
+
+</body>
+</html>

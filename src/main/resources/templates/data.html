@@ -1,0 +1,75 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Wine Search - Admin</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+
+        <div class="col m-4 py-2 border rounded">
+
+            <div th:insert="navbar :: navbar"></div>
+
+            <h2 th:if="${message}" th:text="${message}"></h2>
+
+            <h1 class="display-3">Data</h1>
+
+            <p th:if="${data.isEmpty()}" class="lead">
+                Create products a product and upload a spreadsheet.
+            </p>
+
+            <div th:if="!${data.isEmpty()}">
+                <p class="lead">
+                    Data is created when spreadsheets are uploaded.  It is written to database and used for geospacial searches.
+                </p>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Filename</th>
+                    <th scope="col">Version</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Address</th>
+                    <th scope="col">City</th>
+                    <th scope="col">Zip</th>
+                    <th scope="col">Location</th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="d:${data}">
+                <tr>
+                    <th th:text="${d.getProduct()}"></th>
+                    <th th:text="${d.getSpreadsheet()}"></th>
+                    <th th:text="${d.getVersion()}"></th>
+                    <td th:text="${d.getCustomer()}"></td>
+                    <td th:text="${d.getAddress()}"></td>
+                    <td th:text="${d.getCity()}"></td>
+                    <td th:text="${d.getZip()}"></td>
+                    <td th:text="${d.location.getCoordinates()}"></td>
+                </tr>
+                </th:block>
+
+                </tbody>
+            </table>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+</body>
+</html>

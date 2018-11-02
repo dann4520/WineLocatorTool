@@ -1,0 +1,175 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Wine Search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+</head>
+<body>
+
+<div class="container-fluid">
+<div class="row">
+
+    <div class="col m-4 py-2 border rounded">
+
+        <div th:insert="navbar :: navbar"></div>
+
+        <div th:if="${message}" class="pt-2">
+            <div th:class="${class}">
+                <h3 th:text="${message}"></h3>
+            </div>
+        </div>
+
+<p class="lead mt-4">
+    <em>Spreadsheets</em> are uploaded to specific <em>product</em>.  When the distributer sends an updated spreadsheet for a item,
+    upload it to the same <em>product</em>.  Past data is kept around to produce the line graph on the <strong>dashboard</strong>.
+</p>
+
+        <div class="dropdown">
+            <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Select a Product
+            </a>
+
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <th:block th:each="product:${products}">
+                    <a class="dropdown-item select_product" href="#" th:text="${product}" th:id="${product}"></a>
+                </th:block>
+                <a class="dropdown-item" href="#" th:if="${products.isEmpty()}">Add a Product before adding spreadsheets</a>
+            </div>
+        </div>
+
+        <div th:if="${session.product != null}" id="select_product">
+            <p class="lead mt-2">Currently viewing product: <strong th:text="${session.product}"></strong></p>
+
+            <div class="btn-group py-2" role="group">
+                <button type="button" class="btn btn-secondary" id="list_spreadsheets_button">List Spreadsheets for Product</button>
+                <button type="button" class="btn btn-secondary" id="add_spreadsheet_button">Upload Spreadsheet to Product</button>
+            </div>
+        </div>
+
+        <div id="list_spreadsheets">
+            <div th:if="${spreadsheets != null && spreadsheets.isEmpty()}">
+                    <div class="alert alert-warning mt-2">
+                        <h2>No spreadsheets uploaded yet.</h2>
+                    </div>
+            </div>
+
+            <div th:if="!${spreadsheets != null && spreadsheets.isEmpty()}">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>filename</th>
+                    <th>version</th>
+                    <th>last modified</th>
+                    <th>notes</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <th:block th:each="ss:${spreadsheets}">
+                    <tr>
+                        <th th:text="${ss.filename}"></th>
+                        <td th:text="${ss.version}"></td>
+                        <td th:text="${ss.date}"></td>
+                        <td th:text="${ss.notes}"></td>
+                        <td></td>
+                    </tr>
+                </th:block>
+                </tbody>
+            </table>
+            </div>
+
+        </div>
+
+
+    <div id="add_spreadsheet">
+    <form action="/admin/upload_spreadsheet" method="post"
+          enctype="multipart/form-data" id="add_spreadsheet_form" namek="add_spreadsheet_form">
+
+        <input id="product_hidden_field" name="product_hidden_field" type="hidden">
+
+        <h1 class="display-4 py-2">Upload Spreadsheet</h1>
+        <div class="form-group py-2">
+            <input type="file" class="form-control-file" name="file" required>
+            <small id="file_error_text" class="form-text text-warning">Please upload an .xlsx file</small>
+            <h3 class="text-primary mt-2" id="xlsx_loading">Please wait for Xlsx file to be processed.  May take a while ...</h3>
+        </div>
+
+        <div class="form-group py-2">
+            <label for="notes">Notes</label>
+            <input type="text" class="form-control" id="notes" name="notes" required>
+            <small id="notes_error_text" class="form-text text-warning">Please enter a note about this spreadsheet</small>
+        </div>
+        <div class="form-group">
+            <input class="btn" type="submit" id="submit_ss">
+        </div>
+    </form>
+    </div>
+
+
+    </div>
+</div>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+<script th:inline="javascript">
+    $("#add_spreadsheet").hide()
+    $("#list_spreadsheets").hide()
+    $("#file_error_text").hide()
+    $("#notes_error_text").hide()
+    $("#xlsx_loading").hide()
+
+    $(".select_product").click(function(event){
+        $.post("/admin/set_product", {product:event.target.id})
+        .done(function(res){
+        location.reload();
+        })
+    })
+    $("#list_spreadsheets_button").click(function(event){
+        $("#list_spreadsheets").show()
+        $("#add_spreadsheet").hide()
+    })
+    $("#add_spreadsheet_button").click(function(event){
+        $("#list_spreadsheets").hide()
+        $("#add_spreadsheet").show()
+    })
+
+/*<![CDATA[*/
+    var product = /*[[${session.product}]]*/ null;
+/*]]>*/
+
+if(product != null){
+    $("#product_hidden_field").attr("value", product)
+    $("#list_spreadsheets").show()
+}
+
+$("#submit_ss").click(function(event){
+    var ext = ""
+    var filename = ""
+    var notes = $("#notes").val()
+    event.preventDefault()
+    if(event.target.form[1].files.length != 0){
+        filename = event.target.form[1].files[0].name
+        ext = filename.substr(filename.lastIndexOf('.')+1)
+    }
+    //console.log("notes: " + notes + ", " + "ext: " + ext.toLowerCase())
+    if(ext.toLowerCase() == "xlsx" && notes != ""){
+        $("#add_spreadsheet_form").submit()
+        $("#xlsx_loading").slideDown()
+    } else if(ext.toLowerCase() != "xlsx") {
+        $("#file_error_text").fadeIn()
+    } else if(notes == ""){
+        $("#notes_error_text").fadeIn()
+    }
+})
+</script>
+
+</body>
+</html>

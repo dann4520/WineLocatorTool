@@ -1,0 +1,193 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head lang="en">
+
+    <title>Wine Search</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="shortcut icon" type="image/png" th:href="@{/images/wine-icon-32.png}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}"/>
+    <style>
+      #map {
+        height: 400px;
+        width: 100%;
+       }
+       body{
+        background-color: #EFEAE4;
+       }
+       .btn{
+        background-color: #4A3641;
+        border-color: #A28F8F;
+        color: #FFF;
+       }
+       #fa-spinner{
+        color:
+       }
+    </style>
+
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="mt-4 pt-4 col">
+            <form name="find_wine">
+                <input type="hidden" id="maxDistance" name="maxDistance"/>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group row">
+                            <label for="address" class="col-sm-2 col-form-label">Address</label>
+                            <div class="col-sm-10">
+                            <input type="text" id="address" class="form-control shadow" />
+                           </div>
+                        </div>
+                        <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-10">
+                            <span class="form-text text-muted collapse mt-4" id="address_error">Please enter your address</span>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="col text-center">
+                        <div class="btn-group mb-3 shadow" role="group" aria-label="Select Distance">
+                            <button type="button" class="btn" id="1_mile">1 Mile</button>
+                            <button type="button" class="btn" id="3_mile">3 Miles</button>
+                            <button type="button" class="btn" id="5_mile">5 Miles</button>
+                            <button type="button" class="btn" id="10_mile">10 Miles</button>
+                            <button type="button" class="btn" id="20_mile">20 Miles</button>
+                        </div>
+                        <span class="form-text text-muted collapse" id="distance_error">Please select a distance</span>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <input type="submit" class="btn btn-block shadow" value="Find Nearest Wine" id="find_wine_button"/>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <div class="text-center">
+                <i class="fas fa-spinner fa-spin fa-10x py-3 collapse" id="fa-spinner"></i>
+            </div>
+
+            <div class="rounded shadow collapse" id="map"></div>
+
+        </div>
+    </div>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+
+<script th:src="@{/js/bootstrap.bundle.js}"></script>
+<script th:src="@{/js/fontawesome-all.js}"></script>
+
+<script>
+$( document ).ready(function() {
+    $("#fa-spinner").hide()
+    $("#distance_error").hide()
+    $("#find_wine_button").click(function(event){
+        event.preventDefault()
+        var address = $("#address").val()
+        var maxDistance = $("#maxDistance").val()
+        if(maxDistance <= 0){
+            $("#distance_error").slideDown()
+        } else {
+            $("#distance_error").slideUp()
+        }
+
+        if(address == ""){
+            $("#address_error").slideDown()
+        } else {
+            $("#address_error").slideUp()
+        }
+
+        if(maxDistance > 0 && address != ""){
+            $("#fa-spinner").show()
+            $("#map").hide()
+            $.post("/find_wine", {address: address, maxDistance: maxDistance})
+            .done(function(data){
+                console.log(data);
+                $("#fa-spinner").hide()
+                    var map = new google.maps.Map(document.getElementById('map'), {
+                      center: {lat: data.lat, lng: data.lng},
+                      disableDefaultUI: true
+                    });
+
+                    $("#map").fadeIn()
+                    var bounds = new google.maps.LatLngBounds()
+                    var latLng
+                    var marker
+                            var image = {
+                              url: '/images/wine-icon-32.png'
+                            };
+                    data.results.forEach(function(e){
+                        marker = new google.maps.Marker({position: {lat: e.location.coordinates[1],
+                                                                    lng: e.location.coordinates[0]},
+                                                                    map: map,
+                                                                    title: e.customer.split("--")[0],
+                                                                    icon: image});
+                        latLng = new google.maps.LatLng({lat: e.location.coordinates[1], lng: e.location.coordinates[0]});
+                        bounds.extend(latLng);
+                    });
+                    map.fitBounds(bounds);
+
+                    var circle = new google.maps.Circle({
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#FF0000',
+                        fillOpacity: 0.1,
+                        map: map,
+                        center: {lat: data.lat, lng: data.lng},
+                        radius: Math.round(maxDistance)
+                    })
+
+            })
+        }
+    })
+
+    $("#1_mile").click(function(event){
+        $("#maxDistance").attr("value", "1609.34")
+    })
+    $("#3_mile").click(function(event){
+        $("#maxDistance").attr("value", "4828.03")
+    })
+    $("#5_mile").click(function(event){
+        $("#maxDistance").attr("value", "8046.72")
+    })
+    $("#10_mile").click(function(event){
+        $("#maxDistance").attr("value", "16093.4")
+    })
+    $("#20_mile").click(function(event){
+        $("#maxDistance").attr("value", "32186.9")
+    })
+
+
+
+        var autocomplete = new google.maps.places.Autocomplete(
+            /** @type {!HTMLInputElement} */(document.getElementById('address')),
+            {types: ['geocode']
+        });
+})
+</script>
+
+<script async defer
+        th:src="${maps_js}">
+</script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-34746774-3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-34746774-3');
+</script>
+
+
+</body>
+</html>
