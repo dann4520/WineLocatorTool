@@ -15,43 +15,10 @@ import java.util.Map;
 @Component
 public class LocationUtil {
 
-    @Value("${app.zipcodeapi}")
-    String zipcodeapi;
-
     @Value("${app.google.geocache.api}")
     String geocache_api;
 
     Logger logger = LoggerFactory.getLogger(LocationUtil.class);
-
-    //TODO use different api, this one seems to break during tests w big spreadsheets
-    public Map<String, Object> getLatLngFromZip(String zip){
-        Map<String, Object> latLong = new HashMap<>();
-        StringBuilder stringBuilder = new StringBuilder();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String response = "";
-        stringBuilder.append("https://www.zipcodeapi.com/rest/");
-        //stringBuilder.append(zipcodeapi);
-        stringBuilder.append("BNpNquaoVp8jty26CbUF4E4bh9cUBPuEZSqulcXPIKIBsEhHDdsf5g6X4e19blp7");
-        stringBuilder.append("/info.json/");
-        stringBuilder.append(zip);
-        stringBuilder.append("/degrees");
-//        logger.info("url: " + stringBuilder.toString());
-        try {
-            response = OkHttp.get(stringBuilder.toString());
-//            logger.info("reponse: " + response);
-        } catch (IOException e) {
-            logger.error("Error getting Url.\nmessage: " + e.getMessage() + "\nstacktrace: " + e.getStackTrace().toString());
-        }
-
-        try{
-            LatLngResponse latLngResponse = objectMapper.readValue(response, LatLngResponse.class);
-            latLong.put("lat", latLngResponse.getLat());
-            latLong.put("lng", latLngResponse.getLng());
-        } catch(IOException e){
-            logger.error("Error reading value\nmessage: " + e.getMessage() + "\nstacktrace: " + e.getStackTrace().toString());
-        }
-        return latLong;
-    }
 
     public Map<String, Double> getLatLngFromAddress(String address) {
         Map<String, Double> latLong = new HashMap<>();
